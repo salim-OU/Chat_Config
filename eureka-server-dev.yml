@@ -1,1 +1,9 @@
+logging:
+  level:
+    com.netflix.eureka: DEBUG
+    com.netflix.discovery: DEBUG
+    org.springframework.cloud.netflix.eureka: DEBUG
 
+eureka:
+  server:
+    enable-self-preservation: false
