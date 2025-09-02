@@ -1,1 +1,95 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:user_prod}?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER:user_service}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Ne pas créer/modifier les tables automatiquement
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        jdbc.batch_size: 25
+        order_inserts: true
+        order_updates: true
+  h2:
+    console:
+      enabled: false
 
+# JWT sécurisé pour la production
+jwt:
+  secret: ${JWT_SECRET}  # Obligatoire depuis variable d'environnement
+  expiration: 86400000   # 24 heures
+  refresh-expiration: 604800000  # 7 jours
+
+# Paramètres utilisateur stricts en production
+user:
+  min-password-length: 8
+  password:
+    require-uppercase: true
+    require-lowercase: true
+    require-digit: true
+    require-special: true
+  account:
+    max-login-attempts: 3
+    lockout-duration: 30m
+    email-verification-required: true
+
+# CORS restrictif en production
+security:
+  cors:
+    allowed-origins:
+      - "https://${FRONTEND_DOMAIN:your-chat-app.com}"
+      - "https://www.${FRONTEND_DOMAIN:your-chat-app.com}"
+
+# Email activé en production
+mail:
+  enabled: true
+  host: ${MAIL_HOST}
+  port: ${MAIL_PORT}
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}
+
+# Logging en production
+logging:
+  level:
+    net.chat.userservice: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    com.zaxxer.hikari: INFO
+  file:
+    name: logs/user-service.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+
+# Actuator sécurisé en production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /management
+  endpoint:
+    health:
+      show-details: never
+  server:
+    port: 9082  # Port différent pour les endpoints de management
+
+# Configuration de monitoring
+eureka:
+  instance:
+    metadata-map:
+      management.port: 9082
+      management.context-path: /management
