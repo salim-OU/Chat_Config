@@ -1,1 +1,15 @@
 
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    net.chat: WARN
+
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: 
+              - "https://your-chat-app.com"
+              - "https://www.your-chat-app.com"
