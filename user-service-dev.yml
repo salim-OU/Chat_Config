@@ -1,1 +1,65 @@
 
+logging:
+  level:
+    net.chat.userservice: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    url: jdbc:h2:mem:userdb-dev;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+
+# JWT moins strict en développement
+jwt:
+  secret: devSecretKey2024ForDevelopmentOnly
+  expiration: 3600000  # 1 heure en dev pour faciliter les tests
+
+# Paramètres utilisateur moins stricts en dev
+user:
+  min-password-length: 6
+  password:
+    require-uppercase: false
+    require-lowercase: true
+    require-digit: false
+    require-special: false
+  account:
+    max-login-attempts: 10
+    lockout-duration: 5m
+    email-verification-required: false
+
+# CORS plus permissif en dev
+security:
+  cors:
+    allowed-origins:
+      - "http://localhost:3000"
+      - "http://localhost:4200"
+      - "http://localhost:5173"
+      - "http://localhost:8080"
+      - "http://localhost:8081"
+
+mail:
+  enabled: false
+
+# Configuration pour debugging
+debug: true
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
