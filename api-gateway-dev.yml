@@ -1,0 +1,18 @@
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    net.chat: DEBUG
+    reactor.netty: DEBUG
+
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: 
+              - "http://localhost:3000"
+              - "http://localhost:4200"
+              - "http://localhost:5173"
+              - "http://localhost:8081"
+              - "http://localhost:8082"
