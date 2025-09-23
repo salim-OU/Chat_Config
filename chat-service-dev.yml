@@ -1,1 +1,110 @@
+# chat-service.yml - Configuration de base
+server:
+  port: 8083
 
+spring:
+  application:
+    name: chat-service
+  
+  # Configuration JPA/Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.H2Dialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+  
+  # Configuration de la base de données
+  datasource:
+    url: jdbc:h2:mem:chatdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+  
+  # Console H2
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # Configuration des transactions
+  transaction:
+    default-timeout: 30
+    rollback-on-commit-failure: true
+
+# Configuration Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+# Configuration Feign (pour communiquer avec user-service)
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 10000
+        logger-level: basic
+      user-service:
+        connect-timeout: 3000
+        read-timeout: 5000
+
+# Configuration des logs
+logging:
+  level:
+    net.chat.chatservice: INFO
+    org.springframework.cloud.openfeign: DEBUG
+    org.hibernate.SQL: ERROR
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t] %-40.40logger{39} : %m%n%wEx"
+
+# Configuration Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,refresh
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: true
+
+# Configuration spécifique au chat
+chat:
+  room:
+    max-participants: 100
+    max-message-length: 2000
+    recent-messages-limit: 50
+  message:
+    retention-days: 365
+    pagination:
+      default-size: 20
+      max-size: 100
+  websocket:
+    enabled: true
+    endpoint: /chat-websocket
