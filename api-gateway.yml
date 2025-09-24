@@ -42,7 +42,10 @@ spring:
           predicates:
             - Path=/ws/**
       default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - DedupeResponseHeader=Access-Control-Allow-Origin
+        - SetResponseHeader=Access-Control-Allow-Origin, http://localhost:4200
+        - SetResponseHeader=Access-Control-Allow-Credentials, true
+        - AddRequestHeader=X-Gateway, api-gateway
       globalcors:
         corsConfigurations:
           '[/**]':
