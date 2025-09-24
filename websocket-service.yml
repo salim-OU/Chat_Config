@@ -1,27 +1,38 @@
+server:
+  port: 8083
 
-# Configuration commune à tous les environnements
 spring:
   application:
     name: websocket-service
-  config:
-    import: "configserver:http://localhost:8888"
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    url: jdbc:h2:mem:websocketdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+  h2:
+    console:
+      enabled: false
+      path: /h2-console
 
-# Configuration WebSocket commune
-websocket:
-  endpoint: /ws
-  broker:
-    enable-simple: true
-    application-destination-prefix: /app
-    user-destination-prefix: /user
-    heartbeat:
-      interval: 10000
-      timeout: 30000
-
-# Configuration Eureka commune
 eureka:
   client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
     healthcheck:
@@ -30,9 +41,8 @@ eureka:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 90
-    instance-id: ${spring.application.name}:${server.port}
+    health-check-url-path: /actuator/health
 
-# Management endpoints communs
 management:
   endpoints:
     web:
@@ -41,9 +51,120 @@ management:
   endpoint:
     health:
       show-details: when-authorized
-      show-components: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
-# Logging commun
+# Configuration WebSocket
+websocket:
+  endpoint: /ws
+  allowed-origins:
+    - "http://localhost:8080"  # API Gateway
+    - "http://localhost:3000"  # Frontend
+  broker:
+    enable-simple: true
+    application-destination-prefix: /app
+    user-destination-prefix: /user
+  session:
+    max-concurrent-sessions: 1000
+    max-message-size: 65536
+    max-buffer-size: 524288
+    timeout:
+      handshake: 10000
+      close: 30000
+  heartbeat:
+    interval: 10000
+    timeout: 30000
+
+# Configuration JWT pour l'authentification WebSocket
+jwt:
+  secret: ${JWT_SECRET:websocketServiceSecretKey2024ForJWTValidation}
+  expiration: 86400000  # 24 heures (86400000 ms)
+  issuer: chat-app
+  header: Authorization
+  token-prefix: Bearer 
+
+# Configuration des services externes
+service:
+  user:
+    name: user-service
+    path: /api/users
+    timeout: 5000
+  chat:
+    name: chat-service
+    path: /api/chat
+    timeout: 5000
+
+# Configuration des limites WebSocket
+limits:
+  max-connections-per-user: 3
+  max-rooms-per-user: 10
+  message-rate-limit: 10  # messages par seconde
+  connection-timeout: 3600000  # 1 heure
+
+# Configuration de résilience
+resilience:
+  circuit-breaker:
+    user-service:
+      failure-rate-threshold: 50
+      wait-duration-in-open-state: 10s
+      sliding-window-size: 10
+    chat-service:
+      failure-rate-threshold: 50
+      wait-duration-in-open-state: 10s
+      sliding-window-size: 10
+  retry:
+    max-attempts: 3
+    backoff:
+      initial-interval: 1000
+      multiplier: 2.0
+      max-interval: 5000
+
+# Configuration du pool de threads
+thread-pool:
+  core-size: 10
+  max-size: 50
+  queue-capacity: 1000
+  keep-alive: 60s
+
+# Configuration de sécurité
+security:
+  cors:
+    allowed-origins:
+      - "http://localhost:8080"  # API Gateway
+      - "http://localhost:3000"  # Frontend
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+# Configuration des topics WebSocket
+topics:
+  messages: /topic/messages
+  notifications: /topic/notifications
+  users: /topic/users
+  typing: /topic/typing
+  system: /topic/system
+
+# Configuration du caching
+cache:
+  user-sessions:
+    ttl: 300000  # 5 minutes
+    max-size: 1000
+  room-participants:
+    ttl: 60000   # 1 minute
+    max-size: 500
+
 logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    net.chat.websocket: INFO
+    org.springframework.web.socket: INFO
+    org.springframework.messaging: INFO
+    org.springframework.security: INFO
+    org.hibernate: INFO
