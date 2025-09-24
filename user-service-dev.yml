@@ -23,8 +23,9 @@ spring:
 
 # JWT moins strict en développement
 jwt:
-  secret: devSecretKey2024ForDevelopmentOnly
-  expiration: 3600000  # 1 heure en dev pour faciliter les tests
+  secret: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B597033733676397924423F4528482B4D6251655468576D5A713474367739792442"
+  expiration: 3600000
+  refresh-expiration: 86400000
 
 # Paramètres utilisateur moins stricts en dev
 user:
