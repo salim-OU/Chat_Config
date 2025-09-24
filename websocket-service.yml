@@ -1,1 +1,49 @@
 
+# Configuration commune à tous les environnements
+spring:
+  application:
+    name: websocket-service
+  config:
+    import: "configserver:http://localhost:8888"
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+# Configuration WebSocket commune
+websocket:
+  endpoint: /ws
+  broker:
+    enable-simple: true
+    application-destination-prefix: /app
+    user-destination-prefix: /user
+    heartbeat:
+      interval: 10000
+      timeout: 30000
+
+# Configuration Eureka commune
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    healthcheck:
+      enabled: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+    instance-id: ${spring.application.name}:${server.port}
+
+# Management endpoints communs
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+
+# Logging commun
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
