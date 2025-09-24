@@ -1,0 +1,89 @@
+# Configuration production WebSocket Service
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# Configuration WebSocket production
+websocket:
+  allowed-origins:
+    - "https://votre-domaine.com"
+    - "https://www.votre-domaine.com"
+  message-buffer-size: 102400
+  send-time-limit: 5000
+  send-buffer-size-limit: 1048576
+
+# Logging production
+logging:
+  level:
+    net.chat.websocket: INFO
+    org.springframework.web.socket: WARN
+    org.springframework.messaging: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
+  file:
+    name: logs/websocket-service.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+
+# Sécurité renforcée en production
+security:
+  basic:
+    enabled: true
+
+# Configuration des limites pour la production
+websocket:
+  session:
+    max-concurrent-sessions: 5000
+    max-message-size: 32768
+    max-buffer-size: 262144
+    timeout:
+      handshake: 10000
+      close: 30000
+
+# Configuration du pool de threads
+spring:
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 50
+        queue-capacity: 1000
+      thread-name-prefix: "ws-task-"
+
+# Monitoring production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+    metrics:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+# Configuration de résilience
+resilience4j:
+  circuitbreaker:
+    instances:
+      user-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        sliding-window-size: 10
+      chat-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        sliding-window-size: 10
