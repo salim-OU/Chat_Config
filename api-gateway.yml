@@ -1,3 +1,78 @@
+# server:
+#   port: 8080
+
+# spring:
+#   application:
+#     name: api-gateway
+#   cloud:
+#     gateway:
+#       discovery:
+#         locator:
+#           enabled: true
+#           lower-case-service-id: true
+#       routes:
+#         # Routes de test
+#         - id: test-service
+#           uri: https://jsonplaceholder.typicode.com
+#           predicates:
+#             - Path=/api/test/**
+#           filters:
+#             - StripPrefix=2
+#         - id: httpbin
+#           uri: https://httpbin.org
+#           predicates:
+#             - Path=/api/httpbin/**
+#           filters:
+#             - StripPrefix=2
+#         # Routes pour microservices futurs
+#         - id: chat-service
+#           uri: lb://chat-service
+#           predicates:
+#             - Path=/api/chat/**
+#           filters:
+#             - StripPrefix=2
+#         - id: user-service
+#           uri: lb://user-service
+#           predicates:
+#             - Path=/api/users/**
+#           filters:
+#             - StripPrefix=2
+#         - id: websocket-service
+#           uri: lb://websocket-service
+#           predicates:
+#             - Path=/ws/**
+#       default-filters:
+#         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+#       globalcors:
+#         corsConfigurations:
+#           '[/**]':
+#             allowedOriginPatterns: "*"
+#             allowedMethods: "*"
+#             allowedHeaders: "*"
+#             allowCredentials: true
+
+# eureka:
+#   client:
+#     service-url:
+#       defaultZone: http://localhost:8761/eureka/
+#   instance:
+#     prefer-ip-address: true
+#     lease-renewal-interval-in-seconds: 30
+#     lease-expiration-duration-in-seconds: 90
+
+# management:
+#   endpoints:
+#     web:
+#       exposure:
+#         include: health,info,gateway,routes,refresh
+#   endpoint:
+#     health:
+#       show-details: always
+
+# logging:
+#   level:
+#     org.springframework.cloud.gateway: INFO
+#     net.chat: INFO
 server:
   port: 8080
 
@@ -11,38 +86,49 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        # Routes de test
-        - id: test-service
-          uri: https://jsonplaceholder.typicode.com
+        # Route WebSocket pour le service de chat temps réel
+        - id: websocket-service
+          uri: lb://websocket-service
           predicates:
-            - Path=/api/test/**
+            - Path=/ws/**
+            - Method=GET,POST,OPTIONS
+          filters:
+            - StripPrefix=1
+            - RewritePath=/ws/(?<segment>.*), /$\{segment}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+            - name: Retry
+              args:
+                retries: 3
+                methods: GET,POST
+                exceptions: java.io.IOException, java.util.concurrent.TimeoutException
+        
+        # Route pour les API REST du WebSocket service (si nécessaire)
+        - id: websocket-service-api
+          uri: lb://websocket-service
+          predicates:
+            - Path=/api/websocket/**
           filters:
             - StripPrefix=2
-        - id: httpbin
-          uri: https://httpbin.org
-          predicates:
-            - Path=/api/httpbin/**
-          filters:
-            - StripPrefix=2
-        # Routes pour microservices futurs
-        - id: chat-service
-          uri: lb://chat-service
-          predicates:
-            - Path=/api/chat/**
-          filters:
-            - StripPrefix=2
+        
+        # Routes existantes...
         - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
           filters:
             - StripPrefix=2
-        - id: websocket-service
-          uri: lb://websocket-service
+        
+        - id: chat-service
+          uri: lb://chat-service
           predicates:
-            - Path=/ws/**
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            - Path=/api/chat/**
+          filters:
+            - StripPrefix=2
+
+      # Configuration CORS globale pour WebSocket
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -50,26 +136,16 @@ spring:
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
+            maxAge: 3600
 
+# Reste de votre configuration...
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 30
-    lease-expiration-duration-in-seconds: 90
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info,gateway,routes,refresh
-  endpoint:
-    health:
-      show-details: always
-
-logging:
-  level:
-    org.springframework.cloud.gateway: INFO
-    net.chat: INFO
