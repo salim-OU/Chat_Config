@@ -1,1 +1,66 @@
 
+server:
+  port: 8081
+
+spring:
+  application:
+    name: chat-service
+  datasource:
+    url: jdbc:h2:mem:chatdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Configuration spécifique au chat
+chat:
+  message:
+    max-length: 1000
+    history-limit: 100
+  room:
+    max-users: 50
+    default-name: "General"
+    max-rooms-per-user: 10
+  file:
+    upload:
+      enabled: true
+      max-size: 10MB
+      allowed-types: jpg,jpeg,png,gif,pdf,txt
+
+# Configuration OpenFeign pour communiquer avec User Service
+feign:
+  client:
+    config:
+      user-service:
+        connectTimeout: 5000
+        readTimeout: 5000
