@@ -1,48 +1,51 @@
-# Configuration commune à tous les environnements
-spring:
-  application:
-    name: websocket-service
-  config:
-    import: "configserver:http://localhost:8888"
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+# Configuration développement WebSocket Service
+server:
+  port: 8083
 
-# Configuration WebSocket commune
+# Configuration WebSocket développement
 websocket:
-  endpoint: /ws
-  broker:
-    enable-simple: true
-    application-destination-prefix: /app
-    user-destination-prefix: /user
-    heartbeat:
-      interval: 10000
-      timeout: 30000
+  allowed-origins:
+    - "http://localhost:3000"
+    - "http://localhost:4200"
+    - "http://localhost:5173"
+    - "http://localhost:8080"
+    - "http://localhost:8081"
+    - "http://localhost:8082"
+  message-buffer-size: 51200
+  send-time-limit: 10000
+  send-buffer-size-limit: 512000
 
-# Configuration Eureka commune
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    healthcheck:
-      enabled: true
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 30
-    lease-expiration-duration-in-seconds: 90
-    instance-id: ${spring.application.name}:${server.port}
-
-# Management endpoints communs
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when-authorized
-      show-components: when-authorized
-
-# Logging commun
+# Logging détaillé pour le développement
 logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    net.chat.websocket: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.messaging.simp: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Configuration pour le débogage
+debug: true
+
+# Désactivation partielle de la sécurité pour les tests
+security:
+  basic:
+    enabled: false
+
+# Configuration des limites pour le développement
+websocket:
+  session:
+    max-concurrent-sessions: 1000
+    max-message-size: 65536
+    max-buffer-size: 524288
+
+# Fallback configuration si Config Server indisponible
+spring:
+  cloud:
+    config:
+      fail-fast: false
+      retry:
+        max-attempts: 3
+        max-interval: 2000
