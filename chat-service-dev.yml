@@ -108,114 +108,47 @@
 #   websocket:
 #     enabled: true
 #     endpoint: /chat-websocket
-server:
-  port: 8081
-
 spring:
-  application:
-    name: chat-service
-  
-  # Configuration JPA/Hibernate
+  # Configuration JPA/Hibernate pour dev
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
-    show-sql: false
+      ddl-auto: create-drop  # Recrée les tables à chaque démarrage en dev
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
         use_sql_comments: true
-        dialect: org.hibernate.dialect.MySQLDialect
-        jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
-    open-in-view: false
-  
-  # Configuration MySQL
-  datasource:
-    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/chatdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:motdepasse123*}
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 1200000
-  
-  # Configuration des transactions
-  transaction:
-    default-timeout: 30
-    rollback-on-commit-failure: true
+        
+# Configuration des logs pour dev
+logging:
+  level:
+    net.chat.chatservice: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.zaxxer.hikari: DEBUG
 
-# Configuration Eureka
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    fetch-registry: true
-    register-with-eureka: true
-    healthcheck:
-      enabled: true
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 30
-    lease-expiration-duration-in-seconds: 90
-    health-check-url-path: /actuator/health
-
-# Configuration Feign
-feign:
-  client:
-    config:
-      default:
-        connect-timeout: 5000
-        read-timeout: 10000
-        logger-level: basic
-      user-service:
-        connect-timeout: 3000
-        read-timeout: 5000
-
-# Configuration Actuator
+# Configuration Actuator plus ouverte en dev
 management:
+  endpoint:
+    health:
+      show-details: always
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,refresh
-  endpoint:
-    health:
-      show-details: when-authorized
-  health:
-    defaults:
-      enabled: true
-    db:
-      enabled: true
+        include: "*"
 
-# Configuration spécifique au chat
+# Configuration spécifique au chat plus permissive en dev
 chat:
   room:
-    max-participants: 100
-    max-message-length: 2000
-    recent-messages-limit: 50
+    max-participants: 10  # Plus petit pour les tests
+    max-message-length: 1000
+    recent-messages-limit: 20
   message:
-    retention-days: 365
+    retention-days: 30  # Plus court en dev
     pagination:
-      default-size: 20
-      max-size: 100
-  websocket:
-    enabled: true
-    endpoint: /chat-websocket
+      default-size: 10
+      max-size: 50
 
-# Configuration des logs
-logging:
-  level:
-    net.chat.chatservice: INFO
-    org.springframework.cloud.openfeign: INFO
-    org.hibernate.SQL: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t] %-40.40logger{39} : %m%n%wEx"
-
-chat:
-  debug: true
-  message:
-    history-limit: 50
+# Configuration pour debugging
+debug: true
