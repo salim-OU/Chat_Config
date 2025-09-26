@@ -1,153 +1,33 @@
-# server:
-#   port: 8082
-
-# spring:
-#   application:
-#     name: user-service
-#   datasource:
-#     url: jdbc:h2:mem:userdb
-#     driver-class-name: org.h2.Driver
-#     username: sa
-#     password: ""
-#     hikari:
-#       maximum-pool-size: 10
-#       minimum-idle: 5
-#       connection-timeout: 20000
-#       idle-timeout: 300000
-#       max-lifetime: 1200000
-#   jpa:
-#     hibernate:
-#       ddl-auto: create-drop
-#     show-sql: false
-#     database-platform: org.hibernate.dialect.H2Dialect
-#     properties:
-#       hibernate:
-#         format_sql: false
-#         use_sql_comments: false
-#   h2:
-#     console:
-#       enabled: false
-#       path: /h2-console
-
-# eureka:
-#   client:
-#     service-url:
-#       defaultZone: http://localhost:8761/eureka/
-#     register-with-eureka: true
-#     fetch-registry: true
-#     healthcheck:
-#       enabled: true
-#   instance:
-#     prefer-ip-address: true
-#     lease-renewal-interval-in-seconds: 30
-#     lease-expiration-duration-in-seconds: 90
-#     health-check-url-path: /actuator/health
-
-# management:
-#   endpoints:
-#     web:
-#       exposure:
-#         include: health,info,metrics
-#   endpoint:
-#     health:
-#       show-details: when-authorized
-#   metrics:
-#     export:
-#       prometheus:
-#         enabled: true
-
-# # Configuration JWT
-# jwt:
-#   secret: ${JWT_SECRET:chatApplicationSecretKey2024ForJWTTokenGenerationAndValidation}
-#   expiration: 86400000  # 24 heures (86400000 ms)
-#   refresh-expiration: 604800000  # 7 jours (604800000 ms)
-#   issuer: chat-app
-#   header: Authorization
-#   token-prefix: Bearer 
-
-# # Configuration utilisateur
-# user:
-#   default-avatar: "https://via.placeholder.com/150/009688/FFFFFF?text=User"
-#   max-username-length: 30
-#   min-username-length: 3
-#   min-password-length: 8
-#   max-password-length: 128
-#   password:
-#     require-uppercase: true
-#     require-lowercase: true
-#     require-digit: true
-#     require-special: false
-#     blocked-passwords:
-#       - password
-#       - 123456
-#       - qwerty
-#       - admin
-#   account:
-#     max-login-attempts: 5
-#     lockout-duration: 15m
-#     email-verification-required: false
-#     account-expiry-days: 365
-
-# # Configuration Email (désactivé par défaut)
-# mail:
-#   enabled: false
-#   host: ${MAIL_HOST:smtp.gmail.com}
-#   port: ${MAIL_PORT:587}
-#   username: ${MAIL_USERNAME:}
-#   password: ${MAIL_PASSWORD:}
-#   properties:
-#     mail.smtp.auth: true
-#     mail.smtp.starttls.enable: true
-#     mail.smtp.timeout: 5000
-
-# # Configuration de sécurité
-# security:
-#   cors:
-#     allowed-origins:
-#       - "http://localhost:8080"  # API Gateway
-#       - "http://localhost:3000"  # Frontend possible
-#     allowed-methods:
-#       - GET
-#       - POST
-#       - PUT
-#       - DELETE
-#       - OPTIONS
-#     allowed-headers: "*"
-#     allow-credentials: true
-#     max-age: 3600
-
-# logging:
-#   level:
-#     net.chat.userservice: INFO
-#     org.springframework.security: INFO
-#     org.springframework.web: INFO
-#     org.hibernate: INFO
 server:
   port: 8082
+
 spring:
   application:
     name: user-service
- datasource:
-    url: jdbc:mysql://localhost:3306/userdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: motdepasse123*
+  datasource:
+    url: jdbc:h2:mem:userdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
     hikari:
-      maximum-pool-size: 20
+      maximum-pool-size: 10
       minimum-idle: 5
       connection-timeout: 20000
       idle-timeout: 300000
       max-lifetime: 1200000
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+      ddl-auto: create-drop
     show-sql: false
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         format_sql: false
         use_sql_comments: false
-        dialect: org.hibernate.dialect.MySQLDialect
+  h2:
+    console:
+      enabled: false
+      path: /h2-console
 
 eureka:
   client:
