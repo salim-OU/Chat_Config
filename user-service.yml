@@ -127,44 +127,11 @@ server:
 spring:
   application:
     name: user-service
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:h2}  # Par défaut H2, peut être changé en 'mysql'
-  datasource:
-    url: jdbc:h2:mem:userdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: ""
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 1200000
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-    database-platform: org.hibernate.dialect.H2Dialect
-    properties:
-      hibernate:
-        format_sql: false
-        use_sql_comments: false
-  h2:
-    console:
-      enabled: false
-      path: /h2-console
-
-# Configuration MySQL
----
-spring:
-  config:
-    activate:
-      on-profile: mysql
   datasource:
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/userdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:motdepasse123*}
+    password: ${MYSQL_PASSWORD:password}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -173,7 +140,7 @@ spring:
       max-lifetime: 1200000
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:update}  # update pour MySQL en prod
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
     show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
     properties:
@@ -182,8 +149,6 @@ spring:
         use_sql_comments: false
         dialect: org.hibernate.dialect.MySQLDialect
 
----
-# Configuration commune qui reste inchangée
 eureka:
   client:
     service-url:
